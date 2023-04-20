@@ -1,0 +1,26 @@
+syntax: glob
+*.obj
+*.suo
+*.sdf
+*.bak
+*.pdb
+*.user
+*.exe
+*.opensdf
+*.asv
+*.tlog
+*.tcl
+*.mat
+*.zip
+*.mex*-*
+*.orig
+~$*.*
+._*.*
+MReconTestResults.xml
+Makefile.in
+/docs/mrecon-doc/env
+/docs/mrecon-doc/_build
+/docs/mrecon-doc/.idea
+/docs/mrecon-doc/src/.idea
+/_release
+/mrecon
