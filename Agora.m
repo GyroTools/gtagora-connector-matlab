@@ -3,6 +3,7 @@ classdef Agora
     
     properties
        http_client = [];
+       version = '0.0.1';
     end
     
     properties (Constant)
@@ -11,30 +12,70 @@ classdef Agora
     methods
         function self = Agora(client)
             self.http_client = client;
-%             self.set_default_client(client);
-%             self.version = self.get_version();
-%             self.version.needs('6.0.0', error_message='The python interface needs Agora version 6.0.0 or higher. Please update Agora')           
+            self.version = self.get_version();
+            self.version.needs('6.0.0', 'The python interface needs Agora version 6.0.0 or higher. Please update Agora');
         end   
         
-        function project = get_project(self, project_id)
+        function projects = get_projects(self)
             import agora_connector.models.Project
             project = Project;
-            project = project.get(project_id, self.http_client);
+            projects = project.get_list(self.http_client);
+        end
+            
+        function project = get_project(self, id)
+            import agora_connector.models.Project
+            project = Project;
+            project = project.get(id, self.http_client);
         end
         
+        function project = get_myagora(self)
+            import agora_connector.models.Project
+            project = Project;
+            project = project.get('myagora', self.http_client);
+        end                       
+            
+        function exam = get_exam(self, id)
+            import agora_connector.models.Exam
+            exam = Exam;
+            exam = exam.get(id, self.http_client);
+        end
+        
+        function series = get_series(self, id)
+            import agora_connector.models.Series
+            series = Series;
+            series = series.get(id, self.http_client);
+        end
+        
+        function dataset = get_dataset(self, id)
+            import agora_connector.models.Dataset
+            dataset = Dataset;
+            dataset = dataset.get(id, self.http_client);
+        end
+        
+        function folder = get_folder(self, id)
+            import agora_connector.models.Folder
+            folder = Folder;
+            folder = folder.get(id, self.http_client);
+        end
+        
+        function version = get_version(self)
+            import agora_connector.models.Version
+            version = Version;
+            version = version.get([], self.http_client);
+        end                        
     end
     methods (Static)
         function agora = create(url, api_key, verify_certificate)
-%         Creates an Agora instance. Prefer this method over using the Agora constructor.
-% 
-%         To authenticate use the api_key parameter 
-% 
-%         Arguments:
-%             url {string} -- The base url of the Agora server (e.g "https://agora_connector.mycompany.com")
-%             api_key {string} -- The API key 
-% 
-%         Returns:
-%             Agora -- The agora instance
+            % Creates an Agora instance. Prefer this method over using the Agora constructor.
+            % 
+            % To authenticate use the api_key parameter 
+            % 
+            % Arguments:
+            %     url {string} -- The base url of the Agora server (e.g "https://agora_connector.mycompany.com")
+            %     api_key {string} -- The API key 
+            % 
+            % Returns:
+            %     Agora -- The agora instance
 
             import agora_connector.utils.validate_url
             import agora_connector.http.ApiKeyConnection

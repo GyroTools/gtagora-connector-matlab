@@ -23,6 +23,15 @@ classdef BaseModel < dynamicprops
             self.http_client = http_client;
             self = self.get_object(id);
         end
+        
+        function objects = get_list(self, http_client)            
+            if nargin < 2
+                http_client = [];
+            end
+            self.http_client = http_client;
+            url = self.BASE_URL;
+            objects = self.get_object_list(url);
+        end
     end
     
     methods (Hidden)
@@ -37,12 +46,52 @@ classdef BaseModel < dynamicprops
             end
 
             data = self.http_client.get(url);       
+            self = self.fill_from_data(data);
+        end
+        
+        function self = fill_from_data(self, data)
             fn = fieldnames(data);
             for i = 1:length(fn)
                 self.addprop(fn{i});
                 self.(fn{i}) = data.(fn{i});
             end
         end
-    end
+        
+        function object_list = fill_from_data_array(self, data)
+            if isfield(data, 'results') && isfield(data, 'count')
+                results = data.results;
+                if data.count == 0
+                    object_list = [];
+                    return;
+                end
+                if data.count ~= length(results)
+                    warning('could not get all series');
+                end
+
+                object_list(length(results)) = feval( class(self) );
+                for i = 1:length(results)
+                    object_list(i) = object_list(i).fill_from_data(results(i));
+                    object_list(i).http_client = self.http_client;
+                end
+             elseif length(data) > 1
+                 object_list(length(data)) = feval( class(self) );
+                 for i = 1:length(data)
+                    object_list(i) = object_list(i).fill_from_data(data(i));
+                    object_list(i).http_client = self.http_client;
+                 end                
+             else
+                object_list = self.fill_from_data(self, data);
+                object_list.http_client = self.http_client;
+            end
+        end
+        
+        function object_list = get_object_list(self, url)            
+            if isempty(self.http_client)
+                error('http client not set');
+            end
+            data = self.http_client.get(url);                      
+            object_list = fill_from_data_array(self, data);
+        end
+    end       
 end
 
