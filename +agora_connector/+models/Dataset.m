@@ -1,4 +1,4 @@
-classdef Dataset < agora_connector.models.BaseModel
+classdef Dataset < agora_connector.models.BaseModel & agora_connector.models.DownloadMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -19,6 +19,13 @@ classdef Dataset < agora_connector.models.BaseModel
                 datafiles = datafile.fill_from_data_array(self.datafiles);               
             end            
         end
+
+        function downloaded_files = download(self, path)
+            datafiles = self.get_datafiles();
+            downloaded_files = {};
+            for i = 1:length(datafiles)
+                downloaded_files{end+1} = datafiles(i).download(path);
+            end            
+        end
     end
 end
-

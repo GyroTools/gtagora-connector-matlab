@@ -22,10 +22,21 @@ classdef Agora
             projects = project.get_list(self.http_client);
         end
             
-        function project = get_project(self, id)
+        function project = get_project(self, id_or_name)
             import agora_connector.models.Project
-            project = Project;
-            project = project.get(id, self.http_client);
+            if ischar(id_or_name)
+                projects = self.get_projects();
+                for i = 1:length(projects)
+                    if strcmp(projects(i).name, id_or_name)
+                        project = projects(i);
+                        return;
+                    end                    
+                end
+                error('project not found');
+            else
+                project = Project;
+                project = project.get(id, self.http_client);
+            end
         end
         
         function project = get_myagora(self)

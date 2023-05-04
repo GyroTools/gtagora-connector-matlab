@@ -1,4 +1,4 @@
-classdef Datafile < agora_connector.models.BaseModel
+classdef Datafile < agora_connector.models.BaseModel & agora_connector.models.DownloadMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -12,10 +12,9 @@ classdef Datafile < agora_connector.models.BaseModel
     methods
         function final_path = download(self, path)
             final_path = fullfile(path, self.original_filename);
-            folder = fileparts(final_path);
-            mkdir(folder);
-            
+            folder = fileparts(final_path);                       
             if ~self.check_for_existing_file(final_path)
+                [ ~, ~ ] = mkdir(folder);
                 url = [self.BASE_URL, num2str(self.id), '/download/'];
                 self.http_client.download(url, final_path);
             end
