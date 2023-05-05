@@ -1,4 +1,5 @@
-classdef Folder < agora_connector.models.BaseModel
+classdef Folder < agora_connector.models.BaseModel & ... 
+                  agora_connector.models.SetNameMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -48,6 +49,7 @@ classdef Folder < agora_connector.models.BaseModel
         end
 
         function folder = create(self, name)
+            import agora_connector.models.Folder
             if self.exists(name, 'folder')
                 error(['a folder with the name "', name, '" already exists']);
             end
@@ -56,7 +58,7 @@ classdef Folder < agora_connector.models.BaseModel
             data.name = name;
             response = self.http_client.post(url, data);            
             if isfield(response, 'content_object')
-                folder = agora_connector.models.Folder;
+                folder = Folder(self.http_client);
                 folder = folder.fill_from_data(response.content_object);
             end       
         end

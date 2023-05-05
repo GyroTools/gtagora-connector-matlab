@@ -1,4 +1,7 @@
-classdef Exam < agora_connector.models.BaseModel & agora_connector.models.DownloadDatasetMixin & agora_connector.models.TaskResultsMixin
+classdef Exam < agora_connector.models.BaseModel & ... 
+                agora_connector.models.DownloadDatasetMixin & ... 
+                agora_connector.models.TaskResultsMixin & ... 
+                agora_connector.models.SetNameMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -10,14 +13,7 @@ classdef Exam < agora_connector.models.BaseModel & agora_connector.models.Downlo
         BASE_URL_V2 = '/api/v2/exam/';
     end
     
-    methods     
-        function self = set_name(self, name)
-            url = [self.BASE_URL, num2str(self.id), '/'];
-            data.name = name;
-            response = self.http_client.put(url, data);  
-            self.name = response.name;
-        end
-        
+    methods                    
         function series = get_series(self)
             import agora_connector.models.Series
             series = Series(self.http_client);

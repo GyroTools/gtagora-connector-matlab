@@ -45,10 +45,13 @@ classdef Client
         
         function response = post(self, url, data, timeout)
             if nargin < 3
-                data = [];
+                data = struct;
             end
             if nargin < 4
                 timeout = self.TIMEOUT;
+            end
+            if isempty(data)
+                data = struct;
             end
             url = [self.connection.url, url];            
             auth = self.connection.get_auth();
@@ -120,6 +123,34 @@ classdef Client
             options.MediaType = 'application/json';
             options = auth.add(options);                                               
             websave(target_filename, url, options);
+        end
+
+        function response = upload(self, url, input_files, target_files, timeout) 
+            import agora_connector.http.ConnectionLegacy
+            import agora_connector.http.ClientLegacy
+
+            if nargin < 5
+                timeout = [];
+            end
+
+            auth = self.connection.get_auth();
+            full_url = [self.connection.url, url];
+            connections_legacy = ConnectionLegacy(self.connection.url, auth.api_key);
+            response = ClientLegacy.Upload(full_url, input_files, target_files, connections_legacy, timeout);
+        end
+    end
+
+    methods (Hidden, Static)
+        function chunk_size = get_upload_chunk_size()
+            heap_space = java.lang.Runtime.getRuntime.maxMemory;
+            heap_space_mb = heap_space /1024/1024;
+            if heap_space_mb < 500
+                chunk_size = 8*1024*1024;
+            elseif heap_space_mb < 900
+                chunk_size = 50*1024*1024;
+            else
+                chunk_size = 100*1024*1024;
+            end
         end
     end
 end
