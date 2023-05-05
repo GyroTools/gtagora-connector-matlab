@@ -1,4 +1,4 @@
-# gtagora-connector [![Build Status](https://travis-ci.org/gyrofx/gtagora-connector-py.svg?branch=master)](https://travis-ci.org/gyrofx/gtagora-connector-py)
+# gtagora-connector
 
 gtagora-connector is a python library to access GyroTools' Agora system.
 
