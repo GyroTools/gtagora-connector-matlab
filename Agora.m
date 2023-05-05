@@ -35,7 +35,7 @@ classdef Agora
                 error('project not found');
             else
                 project = Project;
-                project = project.get(id, self.http_client);
+                project = project.get(id_or_name, self.http_client);
             end
         end
         
