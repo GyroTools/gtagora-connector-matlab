@@ -98,12 +98,12 @@ project = agora.get_project(2);
 exams = project.get_exams();
 ```
 
-<!-- Empty the trash
+Empty the trash
 
 ```matlab
-project = agora.get_project(2)
-project.empty_trash()
-``` -->
+project = agora.get_project(2);
+project.empty_trash();
+```
 
 ### Working with folders
 
@@ -131,15 +131,15 @@ end
 
 Get a subfolder folder by name. None will be returned if the folder does not exist
 
-<!-- ```matlab
+```matlab
 my_folder = folder.get_folder('my_folder')
 ```
 
 The get_folder function also takes a relative path.
 
 ```matlab
-my_folder = folder.get_folder('../../data/my_folder')
-``` -->
+my_subfolder = folder.get_folder('my_folder/my_subfolder')
+``` 
 
 Create a new folder in the root folder (the new folder object is returned). An exception is thrown if a folder with the same name already exists.
 
@@ -153,11 +153,11 @@ Get a folder or create a new one if it does not exist
 new_or_existing_folder = root_folder.get_or_create('TestFolder');
 ```
 
-<!-- Delete a folder. Delete a folder is recursive. It deletes all items. The delete operation does not follow links.
+Delete a folder. Delete a folder is recursive. It deletes all items. The delete operation does not follow links.
 
 ```matlab
-folder.delete()
-``` -->
+folder.remove()
+```
 
 Get all items of a folder. An item could for example be an exam, series or dataset
 
@@ -363,7 +363,8 @@ project = agora.get_project(2);
 tasks = project.get_tasks;
 ```
 
-<!-- Run a task. <br/>
+**Run a task:**
+
 In this example the task has 2 inputs:
 
 - A dataset with key "ds"
@@ -372,14 +373,15 @@ In this example the task has 2 inputs:
 The last line in the code sample waits for the task to finish
 
 ```matlab
-task = agora.get_task(13)
+project = agora.get_myagora();
+task = project.get_task('my_task');
 target_folder = agora.get_folder(24)
 dataset = agora.get_dataset(57)
-taskinfo = task.run(target=target_folder, ds=dataset, size=1024)
-taskinfo.join()
+timeline = task.run(folder, 'ds', dataset, 'size', 13);
+timeline.join()
 ```
 
-alternatively only the ID's of the Agora objects can be given as argument:
+<!-- alternatively only the ID's of the Agora objects can be given as argument:
 
 ```matlab
 taskinfo = task.run(target=target_folder, ds=23, size=1024)

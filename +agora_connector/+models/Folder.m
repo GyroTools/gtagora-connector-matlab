@@ -44,8 +44,26 @@ classdef Folder < agora_connector.models.BaseModel & ...
             item = [];
         end
 
+        function delete_item(self, item)
+            if ~isa(item, 'agora_connector.models.FolderItem')
+                error('the item must be of class agora_connector.models.FolderItem');
+            end
+            url = '/api/v1/folderitem/delete_ids/';
+            data.ids = num2cell(item.id);
+            self.http_client.post(url, data, 60);
+        end
+
         function folders = get_folders(self)
             folders = self.get_objs('folder');
+        end
+
+        function folder = get_folder(self, path)
+            parts = self.split_path(path);
+            folder = self;
+            for j = 1:length(parts)
+                part = parts{j};
+                folder = folder.get_folder_by_name(part);
+            end
         end
 
         function folder = create(self, name)
@@ -66,13 +84,7 @@ classdef Folder < agora_connector.models.BaseModel & ...
         function next_folder = get_or_create(self, path)
             next_folder = self;
                         
-            p = path;
-            parts = {};
-            while p ~= '\'
-                [p, part] = fileparts(p);
-                parts{end+1} = part;
-            end
-            parts = parts(end:-1:1);
+            parts = self.split_path(path);
             for j = 1:length(parts)
                 part = parts{j};
                 next_folder_exists = false;
@@ -112,6 +124,13 @@ classdef Folder < agora_connector.models.BaseModel & ...
             end
         end
 
+        function upload(self, path)
+            import agora_connector.models.ImportPackage
+            import_package = ImportPackage(self.http_client);
+            import_package = import_package.create();
+            import_package.upload(path, self.id);
+        end
+
         function val = exists(self, name, type)
             val = false;
             objs = self.get_objs(type);
@@ -121,7 +140,7 @@ classdef Folder < agora_connector.models.BaseModel & ...
                     return;
                 end
             end
-        end
+        end       
     end
 
     methods(Hidden)
@@ -133,6 +152,30 @@ classdef Folder < agora_connector.models.BaseModel & ...
                     objs = [objs, items(i).content_object];
                 end
             end
+        end   
+
+        function folder = get_folder_by_name(self, name)
+            folder = [];
+            folders = self.get_folders();
+            for i = 1:length(folders)
+                if strcmp(folders(i).name, name)
+                    folder = folders(i);
+                    return;
+                end
+            end
+            error('folder not found');
+        end
+    end
+
+    methods(Hidden, Static)
+        function parts = split_path(path)
+            p = path;
+            parts = {};
+            while p ~= '\'
+                [p, part] = fileparts(p);
+                parts{end+1} = part;
+            end
+            parts = parts(end:-1:1);
         end
     end
 end

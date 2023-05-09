@@ -2,6 +2,10 @@ classdef BaseModel < dynamicprops
     %UNTITLED8 Summary of this class goes here
     %   Detailed explanation goes here
     
+    properties(Abstract,Constant)
+        BASE_URL;
+    end
+
     properties
         http_client = [];
     end        
@@ -31,6 +35,11 @@ classdef BaseModel < dynamicprops
             self.http_client = http_client;
             url = self.BASE_URL;
             objects = self.get_object_list(url);
+        end
+
+        function remove(self)
+            url = [self.BASE_URL, num2str(self.id), '/'];
+            self.http_client.delete(url);   
         end
     end
     

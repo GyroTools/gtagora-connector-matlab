@@ -67,7 +67,7 @@ classdef Client
 
             options = self.get_options(timeout, 'delete');
             url = self.get_url(url);
-            response = webwrite(url, options);     
+            response = webwrite(url, struct, options);     
         end
                                
         function download(self, url, target_filename)            
@@ -83,20 +83,6 @@ classdef Client
             options = auth.add(options);                                               
             websave(target_filename, url, options);
         end
-
-%         function response = upload(self, url, input_files, target_files, timeout) 
-%             import agora_connector.http.ConnectionLegacy
-%             import agora_connector.http.ClientLegacy
-% 
-%             if nargin < 5
-%                 timeout = [];
-%             end
-% 
-%             auth = self.connection.get_auth();
-%             full_url = [self.connection.url, url];
-%             connections_legacy = ConnectionLegacy(self.connection.url, auth.api_key);
-%             response = ClientLegacy.Upload(full_url, input_files, target_files, connections_legacy, timeout);
-%         end
 
         function upload(self, url, input_files, target_files, timeout)             
             if nargin < 5
@@ -183,6 +169,9 @@ classdef Client
 
                     req = matlab.net.http.RequestMessage('POST', header, body);
                     options = matlab.net.http.HTTPOptions('ConnectTimeout', timeout);
+                    if ~self.connection.verify_certificate
+                        options.CertificateFilename = '';            
+                    end     
                     req.send(uri, options);
                 end
                 fclose(fid);
