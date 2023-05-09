@@ -350,17 +350,18 @@ folder.upload(dir, relations=relations)
 
 ### Working with tasks
 
-Get all tasks visible to the current user:
+Get all tasks of a project:
 
 ```matlab
-tasks = agora.get_tasks();
+project = agora.get_myagora();
+tasks = project.get_tasks();
 ```
 
-Get a task by ID
+Get a task by ID or name
 
 ```matlab
-project = agora.get_project(2);
-tasks = project.get_tasks;
+task = project.get_task(4);
+task = project.get_task('my_task');
 ```
 
 **Run a task:**
