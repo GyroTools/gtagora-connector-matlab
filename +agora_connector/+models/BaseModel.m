@@ -61,7 +61,9 @@ classdef BaseModel < dynamicprops
         function self = fill_from_data(self, data)
             fn = fieldnames(data);
             for i = 1:length(fn)
-                self.addprop(fn{i});
+                if ~isprop(self,fn{i})
+                    self.addprop(fn{i});
+                end
                 self.(fn{i}) = data.(fn{i});
             end
         end

@@ -23,20 +23,26 @@ classdef Task < agora_connector.models.BaseModel
         % This function runs the task with the given input and target and returns the result
         function timeline = run(self, target, varargin)  
             import agora_connector.models.TimelineItem
-
-            body_inputs = self.get_inputs(varargin); % get the input dictionary from the keyword arguments            
-            self.check_outputs(target); % check the outputs
-
+            
+            if nargin < 2
+                target = [];
+            else
+                self.check_outputs(target); % check the outputs
+            end
+            body_inputs = struct;
+            if nargin > 2
+                body_inputs = self.get_inputs(varargin); % get the input dictionary from the keyword arguments                        
+            end
             body = struct; % create an empty struct
 
             if nargin > 2 % check if target is given
                 object_name = lower(class(target)); % get the target class name as a lowercase string
                 body.target = struct('object_id', target.id, 'object_type', strrep(object_name, 'agora_connector.models.', '')); % add a struct to the data struct
             else
-                body.target = []; % set the target to empty
+                body.target = NaN;
             end
-
-            body.inputs = body_inputs; % add the input dictionary to the data struct
+           
+            body.inputs = body_inputs; % add the input dictionary to the data struct            
 
             url = sprintf('%s%d/run/', self.BASE_URL, self.id); 
             data = self.http_client.post(url, body, 60);  

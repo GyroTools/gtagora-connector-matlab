@@ -68,6 +68,12 @@ classdef Agora
             folder = Folder;
             folder = folder.get(id, self.http_client);
         end
+
+        function task = get_task(self, id)
+            import agora_connector.models.Task
+            task = Task;
+            task = task.get(id, self.http_client);
+        end
         
         function version = get_version(self)
             import agora_connector.models.Version
