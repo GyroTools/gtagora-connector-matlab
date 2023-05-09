@@ -378,7 +378,7 @@ project = agora.get_myagora();
 task = project.get_task('my_task');
 target_folder = agora.get_folder(24)
 dataset = agora.get_dataset(57)
-timeline = task.run(folder, 'ds', dataset, 'size', 13);
+timeline = task.run(target_folder, 'ds', dataset, 'size', 13);
 timeline.join()
 ```
 
