@@ -21,41 +21,55 @@ classdef BaseModel < dynamicprops
             if nargin < 2
                 id = [];
             end
-            if nargin < 3
-                http_client = [];
+            if ~isempty(id)
+                url = [self.BASE_URL, num2str(id), '/'];
+            else
+                url = self.BASE_URL;
             end
-            self.http_client = http_client;
-            self = self.get_object(id);
+            if nargin > 2 && ~isempty(http_client)
+                self.http_client = http_client;
+            end            
+            data = self.http_client.get(url);
+            self = self.fill_from_data(data);                        
         end
         
-        function objects = get_list(self, http_client)
-            if nargin < 2
-                http_client = [];
+        function objects = get_list(self, http_client, url)            
+            if nargin > 1 && ~isempty(http_client)
+                self.http_client = http_client;
+            end   
+            if nargin < 3
+                url = [self.BASE_URL, '?limit=10000000000'];
             end
-            self.http_client = http_client;
-            url = [self.BASE_URL, '?limit=10000000000'];
-            objects = self.get_object_list(url);
+            if isempty(self.http_client)
+                error('http client not set');
+            end
+            objects = [];
+            data = self.http_client.get(url);
+            if ~isempty(data)
+                objects = fill_from_data_array(self, data);
+            end                                    
         end
         
         function remove(self)
             url = [self.BASE_URL, num2str(self.id), '/'];
             self.http_client.delete(url);
         end
-    end
-    
-    methods (Hidden)
-        function self = get_object(self, id)
-            if nargin < 2
-                id = [];
-            end
-            if ~isempty(id)
-                url = [self.BASE_URL, num2str(id), '/'];
+        
+        function type = get_content_type(self)            
+            if isa(self, 'agora_connector.models.Exam')
+                type = 'exam';
+            elseif isa(self, 'agora_connector.models.Folder')
+                type = 'folder';
+            elseif isa(self, 'agora_connector.models.Series')
+                type = 'serie';
+            elseif isa(self, 'agora_connector.models.Dataset')
+                type = 'dataset';
+            elseif isa(self, 'agora_connector.models.Patient')
+                type = 'patient';
             else
-                url = self.BASE_URL;
+                type = [];
             end
             
-            data = self.http_client.get(url);
-            self = self.fill_from_data(data);
         end
         
         function self = fill_from_data(self, data)
@@ -95,18 +109,7 @@ classdef BaseModel < dynamicprops
                 object_list.http_client = self.http_client;
             end
         end
-        
-        function object_list = get_object_list(self, url)
-            if isempty(self.http_client)
-                error('http client not set');
-            end
-            object_list = [];
-            data = self.http_client.get(url);
-            if ~isempty(data)
-                object_list = fill_from_data_array(self, data);
-            end
-        end
-        
+                        
         function name = get_class_name(self, full)
             if nargin < 2
                 full = false;
@@ -117,30 +120,15 @@ classdef BaseModel < dynamicprops
                 name = splitted{end};
             end
         end
-        
-        function path = remove_illegal_chars(self, path)
+    end
+                    
+    methods (Static)
+        function path = remove_illegal_chars(path)
             illegal = [':', '*', '"', '<', '>', '|'];
             
             for i = 1:length(illegal)
                 path = strrep(path, illegal(i), '');
             end
-        end
-        
-        function type = get_content_type(self)            
-            if isa(self, 'agora_connector.models.Exam')
-                type = 'exam';
-            elseif isa(self, 'agora_connector.models.Folder')
-                type = 'folder';
-            elseif isa(self, 'agora_connector.models.Series')
-                type = 'serie';
-            elseif isa(self, 'agora_connector.models.Dataset')
-                type = 'dataset';
-            elseif isa(self, 'agora_connector.models.Patient')
-                type = 'patient';
-            else
-                type = [];
-            end
-            
         end
     end
 end

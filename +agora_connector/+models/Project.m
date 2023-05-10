@@ -19,15 +19,15 @@ classdef Project < agora_connector.models.BaseModel
         function exams = get_exams(self)
             import agora_connector.models.Exam
             url = [self.BASE_URL, num2str(self.id), '/exam/?limit=10000000000'];
-            exam = Exam(self.http_client);
-            exams = exam.get_object_list(url);
+            exam = Exam;
+            exams = exam.get_list(self.http_client, url);
         end
         
         function tasks = get_tasks(self)
             import agora_connector.models.Task
             url = [self.BASE_URL, num2str(self.id), '/task/?limit=10000000000'];
-            task = Task(self.http_client);
-            tasks = task.get_object_list(url);
+            task = Task;
+            tasks = task.get_list(self.http_client, url);
         end
 
         function task = get_task(self, name_or_id)
@@ -43,19 +43,15 @@ classdef Project < agora_connector.models.BaseModel
                 end
             else              
                 task = Task(self.http_client);
-                task = task.get_object(name_or_id);
-            end
-
-            url = [self.BASE_URL, num2str(self.id), '/task/?limit=10000000000'];
-            task = Task(self.http_client);
-            tasks = task.get_object_list(url);
+                task = task.get(name_or_id);
+            end           
         end
         
         function hosts = get_hosts(self)
             import agora_connector.models.Host
             url = [self.BASE_URL, num2str(self.id), '/host/?limit=10000000000'];
-            host = Host(self.http_client);
-            hosts = host.get_object_list(url);
+            host = Host;
+            hosts = host.get_list(self.http_client, url);
         end
         
         function members = get_members(self)
@@ -63,14 +59,18 @@ classdef Project < agora_connector.models.BaseModel
             import agora_connector.models.ProjectRole
             import agora_connector.models.User
             
+            if isempty(self.memberships)
+                members = [];
+                return;
+            end
             members(length(self.memberships)) = Member;
             
-            roles = ProjectRole(self.http_client);
-            roles = roles.get_object_list(roles.BASE_URL);
+            roles = ProjectRole;
+            roles = roles.get_list(self.http_client);
                 
             for i = 1:length(self.memberships)
                 user = User(self.http_client);
-                user = user.get_object(self.memberships(i).user);                                                
+                user = user.get(self.memberships(i).user);                                                
                 members(i).user = user;
                 role = [];
                 for j = 1:length(roles)
@@ -99,8 +99,8 @@ classdef Project < agora_connector.models.BaseModel
             elseif isnumeric(role)
                 role_id = role;                
             elseif ischar(role)
-                roles = ProjectRole(self.http_client);
-                roles = roles.get_object_list(roles.BASE_URL);
+                roles = ProjectRole;
+                roles = roles.get_list(self.http_client);
                 role_id = [];
                 for j = 1:length(roles)
                     if strcmpi(roles(j).name, role)

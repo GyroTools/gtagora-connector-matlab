@@ -21,7 +21,7 @@ classdef TimelineItem < agora_connector.models.BaseModel
                 interval = 2;
             end            
             while true
-                self = self.get_object(self.id);
+                self = self.get(self.id);
                 if isfield(self.data, 'state')
                     state = self.data.state;
                     if state == 0 || state == 1

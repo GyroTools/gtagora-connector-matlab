@@ -17,9 +17,9 @@ classdef Exam < agora_connector.models.BaseModel & ...
     methods                    
         function series = get_series(self)
             import agora_connector.models.Series
-            series = Series(self.http_client);
+            series = Series;
             url = [self.BASE_URL, num2str(self.id), '/series/?limit=10000000000'];
-            series = series.get_object_list(url);
+            series = series.get_list(self.http_client, url);
         end
         
         function datasets = get_datasets(self)
@@ -34,9 +34,9 @@ classdef Exam < agora_connector.models.BaseModel & ...
         
         function datasets = get_files(self)
             import agora_connector.models.Dataset
-            dataset = Dataset(self.http_client);
+            dataset = Dataset;
             url = [self.BASE_URL, num2str(self.id), '/files/?limit=10000000000'];                      
-            datasets = dataset.get_object_list(url);            
+            datasets = dataset.get_list(self.http_client, url);            
         end
 
         function downloaded_files = download(self, path, flat)

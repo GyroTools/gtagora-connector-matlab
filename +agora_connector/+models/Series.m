@@ -17,9 +17,9 @@ classdef Series < agora_connector.models.BaseModel & ...
     methods    
         function datasets = get_datasets(self)
             import agora_connector.models.Dataset
-            dataset = Dataset(self.http_client);
+            dataset = Dataset;
             url = [self.BASE_URL, num2str(self.id), '/datasets/?limit=10000000000'];
-            datasets = dataset.get_object_list(url);
+            datasets = dataset.get_list(self.http_client, url);
         end
     end
 end
