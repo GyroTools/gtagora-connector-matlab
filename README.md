@@ -1,6 +1,6 @@
 # gtagora-connector
 
-gtagora-connector is a python library to access GyroTools' Agora system.
+gtagora-connector-matlab is a Matlab library to access GyroTools' Agora system.
 
 ## Installation
 
@@ -41,7 +41,7 @@ if ~isempty(exams)
     end
 end
 
-agora.import_data('/path/to/directroy', new_folder);
+root_folder.upload('/path/to/directory/or/file');
 ```
 
 ## Examples
