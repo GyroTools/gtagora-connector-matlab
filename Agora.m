@@ -43,7 +43,13 @@ classdef Agora
             import agora_connector.models.Project
             project = Project;
             project = project.get('myagora', self.http_client);
-        end                       
+        end  
+        
+        function roles = get_project_roles(self)
+            import agora_connector.models.ProjectRole
+            roles = ProjectRole;
+            roles = roles.get_list(self.http_client);
+        end  
             
         function exam = get_exam(self, id)
             import agora_connector.models.Exam
@@ -79,7 +85,36 @@ classdef Agora
             import agora_connector.models.Version
             version = Version;
             version = version.get([], self.http_client);
-        end                        
+        end  
+        
+        function tags = get_tags(self)
+            import agora_connector.models.Tag
+            tag = Tag;
+            tags = tag.get_list(self.http_client);
+        end 
+        
+        function tag = get_tag(self, id_or_name)
+            import agora_connector.models.Tag
+            if ischar(id_or_name)
+                tags = self.get_tags();
+                for i = 1:length(tags)
+                    if strcmp(tags(i).label, id_or_name)
+                        tag = tags(i);
+                        return;
+                    end                    
+                end
+                error('tag not found');
+            else
+                tag = Tag;
+                tag = tag.get(id_or_name, self.http_client);
+            end
+        end
+        
+        function users = get_users(self)
+            import agora_connector.models.User
+            users = User;
+            users = users.get_list(self.http_client);
+        end 
     end
     methods (Static)
         function agora = create(url, api_key, verify_certificate)

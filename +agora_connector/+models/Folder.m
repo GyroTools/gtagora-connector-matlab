@@ -1,5 +1,6 @@
 classdef Folder < agora_connector.models.BaseModel & ... 
-                  agora_connector.models.SetNameMixin
+                  agora_connector.models.SetNameMixin & ...
+                  agora_connector.models.TagMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     

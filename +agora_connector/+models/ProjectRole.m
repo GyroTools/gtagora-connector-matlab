@@ -1,4 +1,4 @@
-classdef User < agora_connector.models.BaseModel
+classdef ProjectRole < agora_connector.models.BaseModel
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -6,9 +6,11 @@ classdef User < agora_connector.models.BaseModel
     end
     
     properties (Constant)      
+        BASE_URL = '/api/v2/projectrole/';
     end
     
-    methods                   
+    methods
+        
     end
 end
 

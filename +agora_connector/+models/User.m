@@ -6,9 +6,11 @@ classdef User < agora_connector.models.BaseModel
     end
     
     properties (Constant)      
+        BASE_URL = '/api/v1/user/';
     end
     
-    methods                   
+    methods
+        
     end
 end
 

@@ -1,4 +1,6 @@
-classdef Dataset < agora_connector.models.BaseModel & agora_connector.models.DownloadMixin
+classdef Dataset < agora_connector.models.BaseModel & ...
+                   agora_connector.models.DownloadMixin & ...
+                   agora_connector.models.TagMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     

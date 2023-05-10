@@ -98,6 +98,19 @@ project = agora.get_project(2);
 exams = project.get_exams();
 ```
 
+Get the members of a project
+
+```matlab
+members = project.get_members();
+```
+
+Add a new member to the project
+
+```matlab
+users = agora.get_users();
+project.add_member(users(1), 'scientist');
+```
+
 Empty the trash
 
 ```matlab
@@ -253,36 +266,34 @@ series = agora.get_series(76);
 dataset = agora.get_dataset(158);
 ```
 
-<!-- ### Tag Objects
+### Tag Objects
 
 Get all tags the current user has access to:
 
 ```matlab
-tags = agora.get_tags()
+tags = agora.get_tags();
 ```
 
 Get a tag by id or name:
 
 ```matlab
-tag1 = agora.get_tag(id=3)
-tag2 = agora.get_tag(name='good')
+tag1 = agora.get_tag(3);
+tag2 = agora.get_tag('good');
 ```
 
 Tag an agora object:
 
 ```matlab
-exam = agora.get_exam(12)
-series = agora.get_series(24)
-dataset = agora.get_dataset(145)
-folder = agora.get_folder(15)
-patient = agora.get_patient(2)
+exam = agora.get_exam(12);
+series = agora.get_series(24);
+dataset = agora.get_dataset(145);
+folder = agora.get_folder(15);
 
-tag_instance1 = exam.tag(tag1)
-tag_instance2 = series.tag(tag1)
-tag_instance3 = dataset.tag(tag1)
-tag_instance4 = folder.tag(tag1)
-tag_instance5 = patient.tag(tag1)
-``` -->
+tag_instance1 = exam.tag(tag1);
+tag_instance2 = series.tag(tag1);
+tag_instance3 = dataset.tag(tag1);
+tag_instance4 = folder.tag(tag1);
+```
 
 ### Download data
 
