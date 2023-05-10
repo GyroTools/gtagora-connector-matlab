@@ -33,18 +33,21 @@ classdef BaseModel < dynamicprops
             self = self.fill_from_data(data);                        
         end
         
-        function objects = get_list(self, http_client, url)            
+        function objects = get_list(self, http_client, url, timeout)            
             if nargin > 1 && ~isempty(http_client)
                 self.http_client = http_client;
             end   
             if nargin < 3
                 url = [self.BASE_URL, '?limit=10000000000'];
             end
+            if nargin < 4
+                timeout = self.http_client.TIMEOUT;
+            end
             if isempty(self.http_client)
                 error('http client not set');
             end
             objects = [];
-            data = self.http_client.get(url);
+            data = self.http_client.get(url, timeout);
             if ~isempty(data)
                 objects = fill_from_data_array(self, data);
             end                                    

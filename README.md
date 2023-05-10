@@ -111,6 +111,18 @@ users = agora.get_users();
 project.add_member(users(1), 'scientist');
 ```
 
+Search within a project
+
+```matlab
+project.search('test');
+```
+
+Search only for a specific type (datasets in this case)
+
+```matlab
+project.search('test', 'dataset');
+```
+
 Empty the trash
 
 ```matlab
@@ -470,19 +482,21 @@ Get all user groups
 
 ```matlab
 users = agora.get_groups()
-```
+```-->
 
 ### Various
 
-The members of any Agora object can be printed to the console with the display function
+Search in the entire Agora
 
 ```matlab
-exam = agora.get_exam(22)
-exam.display()
+results = agora.search('test');
+``` 
 
-folder = agora.get_folder(15)
-folder.display()
-``` -->
+Search only for a certain type (studies in this case)
+
+```matlab
+results = agora.search('test', 'study');
+``` 
 
 ## Contributing
 

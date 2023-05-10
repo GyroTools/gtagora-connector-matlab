@@ -115,6 +115,19 @@ classdef Agora
             users = User;
             users = users.get_list(self.http_client);
         end 
+        
+        function results = search(self, search_string, result_type)
+            import agora_connector.models.SearchResult
+            
+            if nargin < 3
+                result_type = 0;
+            end
+            params = SearchResult.get_url_params(search_string, result_type);
+            results = SearchResult;
+            url = [results.BASE_URL, params];            
+            results = results.get_list(self.http_client, url, 60);
+        end
+
     end
     methods (Static)
         function agora = create(url, api_key, verify_certificate)
