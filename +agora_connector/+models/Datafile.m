@@ -17,8 +17,7 @@ classdef Datafile < agora_connector.models.BaseModel & agora_connector.models.Do
                 [ ~, ~ ] = mkdir(folder);
                 url = [self.BASE_URL, num2str(self.id), '/download/'];
                 self.http_client.download(url, final_path);
-            end
-            
+            end            
         end
         
         function file_exists = check_for_existing_file(self, desired_path)
@@ -56,7 +55,7 @@ classdef Datafile < agora_connector.models.BaseModel & agora_connector.models.Do
             for k=1:nBytes
                 hashStr(end+1:end+2) = lower(hash_hex(k,:));
             end
-        end
+        end        
     end
 end
 

@@ -70,7 +70,11 @@ classdef Client
             response = webwrite(url, struct, options);     
         end
                                
-        function download(self, url, target_filename)            
+        function download(self, url, target_filename, timeout)  
+            if nargin < 4
+                timeout = self.TIMEOUT;
+            end
+
             url = [self.connection.url, url];            
             auth = self.connection.get_auth();
             
@@ -80,7 +84,8 @@ classdef Client
                 options = weboptions;
             end                                          
             options.MediaType = 'application/json';
-            options = auth.add(options);                                               
+            options = auth.add(options);
+            options.Timeout = timeout;
             websave(target_filename, url, options);
         end
 
