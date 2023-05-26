@@ -20,18 +20,8 @@ classdef Datafile < agora_connector.models.BaseModel & agora_connector.models.Do
             end            
         end
         
-        function file_exists = check_for_existing_file(self, desired_path)
-            if exist(desired_path, 'file')
-                s = dir(desired_path);         
-                filesize = s.bytes;    
-
-                if self.size == filesize && strcmp(self.get_sha1(desired_path), self.sha1)
-                    file_exists = true;
-                    return;
-                end
-            end
-            
-            file_exists = false;
+        function exists = check_for_existing_file(self, desired_path)
+            exists = self.files_exists(desired_path, self.size, self.sha1);            
         end
     end
     
@@ -55,7 +45,20 @@ classdef Datafile < agora_connector.models.BaseModel & agora_connector.models.Do
             for k=1:nBytes
                 hashStr(end+1:end+2) = lower(hash_hex(k,:));
             end
-        end        
+        end   
+        function exists = files_exists(download_path, size, sha1)
+            if exist(download_path, 'file')
+                s = dir(download_path);         
+                filesize = s.bytes;    
+
+                if size == filesize && strcmp(agora_connector.models.Datafile.get_sha1(download_path), sha1)
+                    exists = true;
+                    return;
+                end
+            end
+            
+            exists = false;
+        end
     end
 end
 

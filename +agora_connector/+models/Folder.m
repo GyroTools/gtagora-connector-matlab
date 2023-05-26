@@ -1,6 +1,7 @@
 classdef Folder < agora_connector.models.BaseModel & ... 
                   agora_connector.models.SetNameMixin & ...
-                  agora_connector.models.TagMixin
+                  agora_connector.models.TagMixin & ...
+                  agora_connector.models.DownloadDatasetMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -103,27 +104,27 @@ classdef Folder < agora_connector.models.BaseModel & ...
             end          
         end
 
-        function downloaded_files = download(self, path, flat)
-            if nargin < 3
-                flat = false;
-            end
-
-            downloaded_files = [];
-            items = self.get_items();
-            for i = 1:length(items)
-                item_path = path;
-                if ~strcmpi(items(i).content_type, 'dataset')
-                    if ~flat
-                        item_path = fullfile(path, self.remove_illegal_chars(items(i).content_object.name));
-                    end
-                end
-                if any(strcmpi(items(i).content_type, {'exam', 'folder'}))
-                    downloaded_files = [downloaded_files, items(i).content_object.download(item_path, flat)];  
-                else
-                    downloaded_files = [downloaded_files, items(i).content_object.download(item_path)];                    
-                end
-            end
-        end
+%         function downloaded_files = download(self, path, flat)
+%             if nargin < 3
+%                 flat = false;
+%             end
+% 
+%             downloaded_files = [];
+%             items = self.get_items();
+%             for i = 1:length(items)
+%                 item_path = path;
+%                 if ~strcmpi(items(i).content_type, 'dataset')
+%                     if ~flat
+%                         item_path = fullfile(path, self.remove_illegal_chars(items(i).content_object.name));
+%                     end
+%                 end
+%                 if any(strcmpi(items(i).content_type, {'exam', 'folder'}))
+%                     downloaded_files = [downloaded_files, items(i).content_object.download(item_path, flat)];  
+%                 else
+%                     downloaded_files = [downloaded_files, items(i).content_object.download(item_path)];                    
+%                 end
+%             end
+%         end
 
         function upload(self, path)
             import agora_connector.models.ImportPackage

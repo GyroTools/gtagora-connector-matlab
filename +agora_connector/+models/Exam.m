@@ -37,27 +37,7 @@ classdef Exam < agora_connector.models.BaseModel & ...
             dataset = Dataset;
             url = [self.BASE_URL, num2str(self.id), '/files/?limit=10000000000'];                      
             datasets = dataset.get_list(self.http_client, url);            
-        end
-
-        function downloaded_files = download(self, path, flat)
-            if nargin < 3
-                flat = false;
-            end
-            if flat
-                downloaded_files = download@agora_connector.models.DownloadDatasetMixin(self, path);
-            else
-                downloaded_files = [];
-                files = self.get_files();
-                for i = 1:length(files)
-                    downloaded_files = [downloaded_files, files(i).download(path)];                    
-                end
-                series = self.get_series();
-                for i = 1:length(series)
-                    series_path = fullfile(path, self.remove_illegal_chars(series(i).name));                    
-                    downloaded_files = [downloaded_files, series(i).download(series_path)];                     
-                end
-            end
-        end
+        end       
     end
 end
 
