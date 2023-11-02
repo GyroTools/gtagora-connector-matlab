@@ -22,6 +22,13 @@ classdef Dataset < agora_connector.models.BaseModel & ...
             end            
         end
 
+        function contours = get_contours(self)            
+            import agora_connector.models.Contour
+            dataset = Contour;
+            url = [self.BASE_URL, num2str(self.id), '/userdata/?type=contour'];
+            contours = dataset.get_list(self.http_client, url);               
+        end
+
         function downloaded_files = download(self, path)
             datafiles = self.get_datafiles();
             downloaded_files = {};
