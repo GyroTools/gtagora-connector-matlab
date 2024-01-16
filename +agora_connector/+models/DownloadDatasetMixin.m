@@ -11,6 +11,14 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             parse(p, varargin{:});
             options = p.Results;
 
+            % this is a hack because there is a bug when getting the
+            % download_info for Series. Until it is fixed we call a legacy
+            % download methos (unoptimized)
+            if strcmpi(class(self), 'agora_connector.models.Series')
+                downloaded_files = self.download_legacy(path);
+                return;
+            end
+
             if nargin < 2
                 error('please specify a download directory as argument')
             end
@@ -63,6 +71,14 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
 
             info = info.fill_from_data_array(data);
         end
+
+        function downloaded_files = download_legacy(self, path)
+            datasets = self.get_datasets();
+            downloaded_files = {};
+            for i = 1:length(datasets)
+                downloaded_files = [downloaded_files, datasets(i).download(path)];
+            end
+        end       
     end
 
     methods (Hidden, Access=protected)
