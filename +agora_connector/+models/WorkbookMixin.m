@@ -4,7 +4,7 @@ classdef (Abstract, HandleCompatible) WorkbookMixin
     end
 
     methods
-        function wb = workbooks(self)
+        function wb = get_workbooks(self)
             try
                 wb = self.get_v2();
             catch
