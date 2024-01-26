@@ -11,10 +11,10 @@ classdef Workbook < agora_connector.models.BaseModel
 
     methods (Hidden) 
         function self = decode_masks(self)
-            if isprop(self, 'mask')                    
-                for i = 1:length(self.mask)
+            if isprop(self, 'mask') && ~isempty(self.mask) && isfield(self.mask, 'mMasks')               
+                for i = 1:length(self.mask.mMasks)
                     cm = self.mask.mMasks(i);
-                    mask = zeros(cm.mSizeX, cm.mSizeY, cm.mSizeZ, cm.mSizeT, 'uint8');
+                    mask = zeros(cm.mSizeY, cm.mSizeX, cm.mSizeZ, cm.mSizeT, 'uint8');
                     len = cm.mSliceSize;
                     for s = 1:length(cm.mSliceMask)
                         sm = self.mask.mMasks(i).mSliceMask(s).mBase64Values;
