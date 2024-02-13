@@ -17,32 +17,43 @@ classdef ZipUploadFiles < handle
     end
 
     methods
-        function self = ZipUploadFiles(input_files, target_files)  
-            self.input_files = input_files;            
-            if nargin > 1 && ~isempty(target_files)
-                self.target_files = target_files;
-            end
+        function self = ZipUploadFiles(input_files)  
+            self.input_files = input_files;                        
             self.zip_is_required = false;
         end
 
-        function [input_files, target_files] = create_zip(self, path)  
-            [files_to_zip, root] = self.create_file_list();
+        function zip_files = create_zip(self, path, single_file, zip_filename)
+            import agora_connector.models.UploadFile
+
+            if nargin < 3
+                single_file = false;
+            end
+            if nargin < 4
+                zip_filename = [];
+            end  
+
+            [files_to_zip, root] = self.create_file_list(single_file);
+
             if ~self.zip_is_required
-                input_files = self.input_files;
-                target_files = self.target_files;
+                zip_files = self.input_files;                
                 return;
             end
 
-            index = 0;
-            input_files = {};
-            target_files = {};            
+            index = 0; 
+            zip_id = 0;
 
             while ~isempty(files_to_zip)
-                zip_filename = ['upload_', num2str(index), '.agora_upload'];
+                if isempty(zip_filename)
+                    zip_filename = ['upload_', num2str(index), '.agora_upload'];
+                end
                 zip_path = fullfile(path, zip_filename);
-                 index = index + 1;
-                input_files{end+1} = zip_path;
-                target_files{end+1} = zip_filename;
+                index = index + 1;                
+                uf = UploadFile();
+                uf.id = zip_id;
+                uf.file = zip_path;
+                uf.target = zip_filename;
+                zip_files(zip_id + 1) = uf;    
+                zip_id = length(zip_files);
                 total_size = 0;                
                 cur_files2zip = {};               
 
@@ -50,23 +61,27 @@ classdef ZipUploadFiles < handle
                     cur_file = files_to_zip{1};
                     files_to_zip(1) = [];
                     file = cur_file{1};                     
-                    do_zip = cur_file{3};
+                    do_zip = cur_file{2};
 
                     if do_zip
-                        cur_files2zip{end+1} = file;
+                        cur_file_to_zip = strrep(strrep(file.file, '\', '/'), root, '');
+                        cur_files2zip{end+1} = cur_file_to_zip;
                     else
-                        target_file = cur_file{2};
-                        input_files{end+1} = file;
-                        target_files{end+1} = target_file;
+                        uf = UploadFile();
+                        uf.id = len(zip_files);
+                        uf.file = file.file;
+                        uf.target = file.target;
+                        uf.size = file.size;
+                        zip_files(zip_id + 1) = uf;
+                        zip_id = length(zip_files);
                     end
                    
 
                     % here we should check the size of the zip file but
                     % matlab does not allow to write the zip file on the
                     % fly. Therefore we check the size of the uncompressed
-                    % files
-                    s = dir(file);                              
-                    total_size = total_size + s.bytes;
+                    % files                                                
+                    total_size = total_size + file.size;
                     if total_size >  self.MAX_ZIP_FILE_SIZE
                         break;
                     end
@@ -75,41 +90,44 @@ classdef ZipUploadFiles < handle
                      zip(zip_path, cur_files2zip, root);
                      % the zip command automatically adds a .zip extension
                      movefile([zip_path, '.zip'], zip_path);
-                end
+
+                     file_size = dir(zip_path);
+                     file_size = file_size.bytes;
+                     zip_files(zip_id).size = file_size;
+                end                
             end
         end
     end
 
     methods (Hidden)
-        function [file_list, root] = create_file_list(self)
+        function [file_list, root] = create_file_list(self, single_file)
             file_list = {};
             root = [];
-            for i = 1: max(length(self.input_files), length(self.target_files))
+            for i = 1:length(self.input_files)                
                 in = [];
                 if i <= length(self.input_files)
-                    in = self.input_files{i};
-                end
-                target = [];
-                if i <= length(self.target_files)
-                    target = self.target_files{i};
-                end
-                [file, target_file, do_zip] = self.create_entry(in, target);                
+                    in = self.input_files(i);
+                end                
+                [file, do_zip] = self.create_entry(in, single_file);                
                 if isempty(root)
-                    root = strrep(file, target_file, '');
+                    root = strrep(strrep(file.file, '\', '/'), in.target, '');
                 else
-                    this_root = strrep(file, target_file, '');
+                    this_root = strrep(strrep(file.file, '\', '/'), in.target, '');
                     if ~strcmp(root, this_root)
                         error('the root directory must be the same for all files');
                     end
                 end
-                file_list{end+1} = {file, target_file, do_zip};
-            end
+                file_list{end+1} = {file, do_zip};
+            end            
         end
 
-        function [file, target_file, do_zip] = create_entry(self, file, target_file)
-            s = dir(file);         
-            filesize = s.bytes; 
-            do_zip = filesize < self.MAX_FILE_LIMIT;
+        function [file, do_zip] = create_entry(self, file, single_file)
+            do_zip = single_file;
+            if ~do_zip            
+                s = dir(file.file);         
+                filesize = s.bytes; 
+                do_zip = filesize < self.MAX_FILE_LIMIT;
+            end
 
             if do_zip
                 self.zip_is_required = true;

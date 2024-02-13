@@ -326,13 +326,45 @@ downloaded_files = dataset.download(target);
 
 ### Import data
 
-Upload a directory into a folder
+Upload a file or directory into a folder
 
 ```matlab
-folder = agora.get_folder(45)
+folder = agora.get_folder(45);
 dir = '/data/images/';
-folder.upload(dir)
+file = '/data/logfile.txt';
+folder.upload(dir);
+folder.upload(file);
 ```
+
+### Advanced Upload
+
+The advanced upload functionality creates an upload session for transferring files to Agora. It tracks the upload 
+process, enables the users to resume an interrupted upload and ensures data integrity.
+
+To create an upload session use the following syntax:
+
+```matlab
+files = {'C:/data/raw/rawfile.raw', 'C:/data/raw/rawfile.lab', 'C:/data/log/logfile.txt'};
+progress_file = 'C:/data/progress.json';
+target_folder_id = 45;
+session = agora.create_upload_session(files, target_folder_id, progress_file);
+```
+
+After creating the session start the upload with:
+
+```matlab
+session.start()
+```
+
+If an upload was interrupted or stopped, the session can be recreated and resumed using the progress_file:
+
+```matlab
+session = agora.create_upload_session(progress_file)
+session.start()
+```
+
+Furthermore, the advanced upload will verify the data integrity of the uploaded files by comparing file hashes. It also waits 
+for the data import to finish before returning and checks if all uploaded files are imported successfully. 
 
 <!-- Upload (and import) a rawfile and add an additional file to the the created series (Agora version > 6.3.0):
 

@@ -10,15 +10,7 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             addOptional(p,'max_size_to_zip', 20, @isnumeric);
             parse(p, varargin{:});
             options = p.Results;
-
-            % this is a hack because there is a bug when getting the
-            % download_info for Series. Until it is fixed we call a legacy
-            % download methos (unoptimized)
-            if strcmpi(class(self), 'agora_connector.models.Series')
-                downloaded_files = self.download_legacy(path);
-                return;
-            end
-
+           
             if nargin < 2
                 error('please specify a download directory as argument')
             end
