@@ -215,24 +215,24 @@ classdef ImportPackage < agora_connector.models.BaseModel
                             self.print_progress(progress)
                         end
                         if data.state == 5 && data.progress == 100
+                            if state.verbose
+                                self.print_progress(1);
+                                self.progress_string_length = [];
+                            end
                             state = self.update_import_state(state);
 
                             state.save(progress_file);
                             if state.verbose
                                 self.print_final_message(state);
-                            end
-                            fprintf('\n');
+                            end                            
                             return;
                         end                                              
-                    elseif data.state == -1
-                        fprintf('\n');
-                        disp("Import failed!")
-                        return;
+                    elseif data.state == -1                        
+                        error("Import failed!")                        
                     end
                     pause(5);
                 end
-            end
-            fprintf('\n');
+            end            
         end
 
         function complete(self, json_import_file, target_folder_id)
@@ -330,7 +330,7 @@ classdef ImportPackage < agora_connector.models.BaseModel
 
         function state = update_import_state(self, state)
             import agora_connector.utils.sha1
-
+                        
             url = [self.BASE_URL num2str(self.id) '/result/'];
             
             try
@@ -361,8 +361,17 @@ classdef ImportPackage < agora_connector.models.BaseModel
                 [~, name, ext] = fileparts(state.files(i).target);                    
                 target_names{i} = [name, ext];
             end
-
+            
+            if state.verbose
+                fprintf('\n\n');
+                disp("verifying imports...")
+            end
+            step = max(10, ceil(length(datafiles) / 100));
             for i = 1:length(datafiles)
+                
+                if state.verbose && mod(i, step) == 0
+                    self.print_progress(i/length(datafiles));
+                end
                 datafile = datafiles(i);
                 [~, name, ext] = fileparts(datafile.name);
                 datafile_name = [name, ext];
@@ -376,7 +385,11 @@ classdef ImportPackage < agora_connector.models.BaseModel
                         end
                     end
                 end
-            end                          
+            end
+            if state.verbose
+                self.print_progress(1);
+                self.progress_string_length = [];
+            end            
         end
 
         function print_progress(self, progress, appendix)
@@ -399,7 +412,7 @@ classdef ImportPackage < agora_connector.models.BaseModel
             if state.verbose
                 nr_datafiles_imported = sum([state.files.imported]);
                 success = all([state.files.uploaded] & [state.files.imported]);
-                fprintf('\nImport complete:\n');
+                fprintf('\n\nImport complete:\n');
                 fprintf('  Files Uploaded: %d, Files Imported: %d\n', numel(state.files), nr_datafiles_imported);
                 if success
                     fprintf('\nAll files successfully imported.\n');
@@ -410,6 +423,7 @@ classdef ImportPackage < agora_connector.models.BaseModel
                         fprintf('  %s\n', f.file);
                     end
                 end
+                fprintf('\n');
             end
         end
     end

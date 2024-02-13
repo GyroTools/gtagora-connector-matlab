@@ -6,7 +6,7 @@ classdef UploadSession
     end
     
     methods
-        function self = UploadSession(http_client, paths, target_folder_id, progress_file, json_import_file, verbose)
+        function self = UploadSession(http_client, paths, target_folder_id, progress_file, json_import_file, verbose, wait)
             import agora_connector.models.ImportPackage
             import agora_connector.models.UploadState
 
@@ -21,6 +21,9 @@ classdef UploadSession
             end  
             if nargin < 6
                 verbose = true;
+            end 
+            if nargin < 6
+                wait = true;
             end 
             
             self.progress_file = progress_file;
@@ -43,7 +46,7 @@ classdef UploadSession
                     end
                 end
 
-                state = import_package.create_state(paths, target_folder_id, json_import_file, true, verbose);
+                state = import_package.create_state(paths, target_folder_id, json_import_file, wait, verbose);
 
                 self.state = state;
                 self.import_package = import_package;

@@ -128,7 +128,7 @@ classdef Agora
             results = results.get_list(self.http_client, url, 60);
         end
 
-        function session = create_upload_session(self, paths, target_folder_id, progress_file, json_import_file)
+        function session = create_upload_session(self, paths, target_folder_id, progress_file, json_import_file, verbose, wait)
             import agora_connector.models.UploadSession
             import agora_connector.models.UploadState
 
@@ -141,6 +141,12 @@ classdef Agora
             if nargin < 5
                 json_import_file = [];
             end  
+            if nargin < 6
+                verbose = true;
+            end
+            if nargin < 7
+                wait = true;
+            end
 
             if nargin == 2 && ischar(paths) && UploadState.is_progress_file(paths)
                 progress_file = paths;
@@ -155,7 +161,7 @@ classdef Agora
                     error(['The target folder with id ', num2str(target_folder_id), ' does not exist']);
                 end
             end
-            session = UploadSession(self.http_client, paths, target_folder_id, progress_file, json_import_file);
+            session = UploadSession(self.http_client, paths, target_folder_id, progress_file, json_import_file, verbose, wait);
         end                       
     end
     methods (Static)
