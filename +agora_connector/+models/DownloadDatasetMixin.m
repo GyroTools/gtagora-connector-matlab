@@ -8,6 +8,7 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             addOptional(p,'keep_zip_files', false, booleanValidator);
             addOptional(p,'progress', false, booleanValidator);
             addOptional(p,'max_size_to_zip', 20, @isnumeric);
+            addOptional(p,'subfolder',true, booleanValidator);
             parse(p, varargin{:});
             options = p.Results;
            
@@ -34,7 +35,11 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                 for i = 1:length(direct)
                     % download directly
                     df = direct(i).to_datafile();
-                    final_path = fullfile(path, direct(i).rel_path);
+                    if options.subfolder
+                        final_path = fullfile(path, direct(i).rel_path);
+                    else
+                        final_path = fullfile(path);
+                    end
                     if options.progress
                         disp(['downloading ', fullfile(final_path, df.original_filename), '...']);
                     end
