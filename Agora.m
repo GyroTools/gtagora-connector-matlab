@@ -115,6 +115,11 @@ classdef Agora
             users = User;
             users = users.get_list(self.http_client);
         end 
+
+        function dataset_types = get_dataset_types(self)
+            import agora_connector.models.DatasetTypes
+            dataset_types = DatasetTypes;
+        end
         
         function results = search(self, search_string, result_type)
             import agora_connector.models.SearchResult

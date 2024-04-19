@@ -8,6 +8,8 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             addOptional(p,'keep_zip_files', false, booleanValidator);
             addOptional(p,'progress', false, booleanValidator);
             addOptional(p,'max_size_to_zip', 20, @isnumeric);
+            addOptional(p,'flat', false, booleanValidator);
+            addOptional(p,'dataset_types', [], @isnumeric);
             parse(p, varargin{:});
             options = p.Results;
            
@@ -34,7 +36,11 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                 for i = 1:length(direct)
                     % download directly
                     df = direct(i).to_datafile();
-                    final_path = fullfile(path, direct(i).rel_path);
+                    if options.flat
+                        final_path = path;
+                    else
+                        final_path = fullfile(path, direct(i).rel_path);
+                    end
                     if options.progress
                         disp(['downloading ', fullfile(final_path, df.original_filename), '...']);
                     end
@@ -46,7 +52,7 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                     % TODO maybe limit the size of the zip file or the amount
                     % of files in the zip file (not sure if it is necessary)
     
-                    downloaded_files = [downloaded_files, self.download_zip(datafiles_to_zip, path, options.stream, options.compression, options.keep_zip_files, options.progress)];
+                    downloaded_files = [downloaded_files, self.download_zip(datafiles_to_zip, path, options.stream, options.compression, options.keep_zip_files, options.progress, options.flat)];
                 end
             else
                 if options.progress
@@ -86,7 +92,7 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                 body.dataset_ids = {self.id};
             end
         end
-        function filename = download_zip(self, datafile_ids, path, stream, compression, keep_zip_files, progress)
+        function filename = download_zip(self, datafile_ids, path, stream, compression, keep_zip_files, progress, flat)
             import agora_connector.models.DownloadFile
             if ~isempty(datafile_ids)
                 % download zip
@@ -94,6 +100,7 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                 body = self.get_base_body();
                 body.stream = stream;
                 body.compression = compression;
+                body.flat = flat;
                 body.filter.datafile_ids = datafile_ids;
                 if progress
                     disp('requesting zip file...');
