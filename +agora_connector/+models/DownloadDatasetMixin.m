@@ -10,6 +10,7 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             addOptional(p,'max_size_to_zip', 20, @isnumeric);
             addOptional(p,'flat', false, booleanValidator);
             addOptional(p,'dataset_types', [], @isnumeric);
+            addOptional(p,'regex', [], @ischar);
             parse(p, varargin{:});
             options = p.Results;
            
@@ -20,7 +21,10 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             if options.progress
                 disp('analysing download...');
             end
-            info = self.download_info();
+            info = self.download_info(options.dataset_types, options.regex);
+            if isempty(info)
+                error('nothing to download');
+            end
             downloaded_files = {};
             if ~isempty(info)                
                 exist_mask = arrayfun(@(i) agora_connector.models.Datafile.files_exists( fullfile(fullfile(path, i.rel_path), i.filename), i.size, i.sha1), info);
@@ -61,11 +65,15 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
             end
         end
 
-        function info = download_info(self)
+        function info = download_info(self, dataset_types, regex)
             import agora_connector.models.DownloadInfo
-            body = self.get_base_body();
+            body = self.get_base_body(dataset_types, regex);
             info = DownloadInfo(self.http_client);
             data = self.http_client.post(info.BASE_URL, body, 60);
+            if isempty(data)
+                info = [];
+                return;
+            end
 
             info = info.fill_from_data_array(data);
         end
@@ -80,7 +88,13 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
     end
 
     methods (Hidden, Access=protected)
-        function body = get_base_body(self)
+        function body = get_base_body(self, dataset_types, regex)
+            if nargin < 2
+                dataset_types = [];
+            end
+            if nargin < 3
+                regex = [];
+            end
             body = struct();
             if isa(self, 'agora_connector.models.Exam')
                 body.exam_ids = {self.id};
@@ -90,6 +104,15 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                 body.series_ids = {self.id};
             elseif isa(self, 'agora_connector.models.Dataset')
                 body.dataset_ids = {self.id};
+            end
+            if ~isempty(dataset_types)
+                if length(dataset_types) == 1
+                    dataset_types = {dataset_types};                
+                end
+                body.filter.dataset_types = dataset_types;
+            end
+            if ~isempty(regex)                
+                body.filter.regex = regex;
             end
         end
         function filename = download_zip(self, datafile_ids, path, stream, compression, keep_zip_files, progress, flat)
@@ -101,6 +124,9 @@ classdef (Abstract, HandleCompatible) DownloadDatasetMixin
                 body.stream = stream;
                 body.compression = compression;
                 body.flat = flat;
+                if length(datafile_ids) == 1
+                    datafile_ids = {datafile_ids};                
+                end
                 body.filter.datafile_ids = datafile_ids;
                 if progress
                     disp('requesting zip file...');
