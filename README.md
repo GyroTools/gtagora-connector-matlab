@@ -324,6 +324,27 @@ downloaded_files = series.download(target);
 downloaded_files = dataset.download(target);
 ```
 
+By default, the data from each Study, Series, Dataset, etc., is downloaded to its own subfolder. 
+However, it is possible to disable this behavior and download everything into a single flat folder by using the 'flat' option:
+
+```matlab
+downloaded_files = series.download(target, 'flat', true);
+```
+
+The download can be further customized by filtering the datasets based on their type or by using a regular expression to match the filenames:
+
+
+```matlab
+% filtered by dataset types
+t = agora.get_dataset_types();
+downloaded_files = series.download(target, 'dataset_types', [t.PHILIPS_RAW, t.PHILIPS_SINFILE]);
+
+% filtered by regex (downloads all files with extension .log)
+downloaded_files = series.download(target, 'regex', '\.log');
+```
+
+
+
 ### Import data
 
 Upload a file or directory into a folder
