@@ -184,7 +184,7 @@ Delete a folder. Delete a folder is recursive. It deletes all items. The delete 
 folder.remove()
 ```
 
-Get all items of a folder. An item could for example be an exam, series or dataset
+Get all items of a folder. An item could for example be an exam, series or dataset. Please note that the returned items are sorted by their database id. 
 
 ```matlab
 items = folder.get_items();
@@ -278,6 +278,103 @@ series = agora.get_series(76);
 dataset = agora.get_dataset(158);
 ```
 
+Get the parents of an object
+
+```matlab
+% get parents of a dataset
+series = dataset.get_series();      % get series 
+exam = dataset.get_exam();          % get exam
+patient = dataset.get_patient();    % get patient
+folders = dataset.get_folders();	% get the folders which contain the dataset
+
+% get parents of a series
+exam = series.get_exam();           % get exam
+patient = series.get_patient();     % get patient
+folders = series.get_folders();     % get the folders which contain the series
+
+% get parents of an series
+exam = agora.get_exam(exam_id);
+patient = exam.get_patient();       % get patient
+folders = exam.get_folders();       % get the folders which contain the series
+```
+
+### Filters
+
+Filters can be used to retrieve objects that meet a certain criteria. They can be applied to different object types such as projects, exams, datasets, and series. 
+
+In order to filter objects we pass one or more filter classes to the get functions as argument (e.g. `get_exams`). Every filter class has a `value` attribute which specifies the criteria to be filtered for and an `operator` which specifies the filter operation, such as `contains`, `startswith` etc. 
+
+You can get all the available filters for an object with:
+
+```matlab
+exam_filter_set = agora.get_exam_filters()       % filters for exam
+series_filter_set = agora.get_series_filters()   % filters for series
+dataset_filter_set = agora.get_dataset_filters() % filters for dataset
+```
+
+This returns a map where the key is the field name which is filtered and the value is the filter class. You can get the filter for a specific field with:
+
+```matlab
+name_filter = exam_filter_set.get_filter('name');   % gets the filter which filters for the exam name
+```
+
+Afterwards you can set a filter operator according to your needs:
+
+```matlab
+name_filter.operator = 'startswith';
+```
+
+To display a list of all operators call:
+
+```matlab
+disp(name_filter.operators)
+```
+
+Finally set a filter value and get the objects meeting the filter critera. In this case we would get all studies of a project whose name start with "Study"
+
+```matlab
+name_filter.value = 'Study';
+project.get_exams(name_filter);
+```
+
+Examples:
+
+```matlab
+% get all exams of a  project which start with "study" (case insensitive)
+project = agora.get_project(project_id);                    % get the project
+exam_filter_set = agora.get_exam_filters()                  % get the exam filters
+name_filter = exam_filter_set.get_filter('name');           % get the filter for the exam name
+name_filter.operator = 'istartswith';                       % set the operator
+name_filter.value = 'study';                                % filter for "study"
+project.get_exams(name_filter);                             % get the filtered exams
+
+
+% get all Philips raw datasets of an exam which have "FFE" in the name
+exam = agora.get_exam(exam_id);                             % get an exam
+types = agora.get_dataset_types();                          % get the dataset types
+
+dataset_filter_set = agora.get_dataset_filters()            % get all filters for the dataset
+type_filter = dataset_filter_set.get_filter('type');        % get the filter for the dataset type
+type_filter.value = types.PHILIPS_RAW;                      % specify to filter for Philips raw files
+
+name_filter = dataset_filter_set.get_filter('name');        % get the filter for the dataset name
+name_filter.operator = 'icontains';                         % specify the operator
+name_filter.value = 'ffe';                                  % filter for "ffe"
+
+filters(1) = type_filter;                                   % put both filters in an array
+filters(2) = name_filter;
+datasets = exam.get_datasets(filters);                      % get the filtered datasets
+
+
+% get all series of an exam which have "FFE" in the name
+series_filter_set = agora.get_series_filters()              % get all filters for a series
+name_filter = series_filter_set.get_filter('name');         % get the filter for the series name
+name_filter.value = 'ffe';                                  % filter for "ffe" in name
+exam.get_series(name_filter);                               % get the filtered series    
+```
+
+
+
 ### Tag Objects
 
 Get all tags the current user has access to:
@@ -305,6 +402,22 @@ tag_instance1 = exam.tag(tag1);
 tag_instance2 = series.tag(tag1);
 tag_instance3 = dataset.tag(tag1);
 tag_instance4 = folder.tag(tag1);
+```
+
+Get all objects for a specific tag:
+
+```matlab
+% get tags for a project
+project_id = 3;
+project = agora.get_project(project_id);
+tags = project.get_tags();
+
+% get exams, series, datasets, patients for a tag
+tag = tags(1);
+exams = project.get_exams_for_tag(tag);
+series = project.get_series_for_tag(tag);
+datasets = project.get_datasets_for_tag(tag);
+patients = project.get_patients_for_tag(tag);
 ```
 
 ### Download data
