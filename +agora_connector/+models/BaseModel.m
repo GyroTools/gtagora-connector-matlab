@@ -133,6 +133,19 @@ classdef BaseModel < dynamicprops
                 path = strrep(path, illegal(i), '');
             end
         end
+
+        function url = add_filter(url, filters)
+            for i = 1:length(filters)
+                if ~isa(filters(i), 'agora_connector.models.Filter')
+                    error('the filter must be of class "agora_connector.models.Filter"');
+                end                
+                if strcmpi(filters(i).operator, 'exact')
+                    url = [url, '&', filters(i).field, '=', num2str(filters(i).value)];
+                else                
+                    url = [url, '&', filters(i).field, '__', filters(i).operator, '=', num2str(filters(i).value)];
+                end
+            end
+        end
     end
 end
 

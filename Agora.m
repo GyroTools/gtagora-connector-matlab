@@ -120,6 +120,21 @@ classdef Agora
             import agora_connector.models.DatasetTypes
             dataset_types = DatasetTypes;
         end
+
+        function filters = get_exam_filters(self)
+            import agora_connector.models.FilterSet
+            filters = FilterSet('exam');
+        end
+
+        function filters = get_series_filters(self)
+            import agora_connector.models.FilterSet
+            filters = FilterSet('series');
+        end
+
+        function filters = get_dataset_filters(self)
+            import agora_connector.models.FilterSet
+            filters = FilterSet('dataset');
+        end
         
         function results = search(self, search_string, result_type)
             import agora_connector.models.SearchResult
