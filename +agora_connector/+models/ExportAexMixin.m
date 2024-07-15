@@ -29,6 +29,9 @@ classdef (Abstract, HandleCompatible) ExportAexMixin
             while(~download_file.ready)
                 pause(0.5);
                 download_file.get(download_file.id, download_file.http_client);
+                if ~download_file.ready && ~isempty(download_file.error)
+                    error(['error exporting the aex file: ', download_file.error]);
+                end
             end
             if isempty(download_file.download_name)
                 aex_file = [tempname(outdir), '.aex.'];
