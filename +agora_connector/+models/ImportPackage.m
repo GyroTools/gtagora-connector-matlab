@@ -340,8 +340,8 @@ classdef ImportPackage < agora_connector.models.BaseModel
                 return;
             end
             datafiles = [];
-
-            if ~isempty(data) && numel(data) > 0 && ~isfield(data, 'datafiles')
+            
+            if isempty(data) || (~isempty(data) && numel(data) > 0 && ~isfield(data, 'datafiles'))
                 % old version of Agora which does not return the imported datafiles --> set all to imported (hack)
                 for i = 1:length(state.files)
                     state.files(i).imported = true;
@@ -439,8 +439,8 @@ classdef ImportPackage < agora_connector.models.BaseModel
             for i = 1:length(paths)
                 path = paths{i};
                 if isfolder(path)
-                    root = path;
-                    filelist = dir(fullfile(path, '**\*.*'));
+                    root = path;                    
+                    filelist = dir(fullfile(path, '**', '*.*'));
                     for j = 1:length(filelist)
                         if ~filelist(j).isdir
                             absolute_file_path = fullfile(filelist(j).folder, filelist(j).name);
