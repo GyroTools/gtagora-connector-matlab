@@ -2,7 +2,11 @@ classdef Dataset < agora_connector.models.BaseModel & ...
                    agora_connector.models.DownloadMixin & ...
                    agora_connector.models.TagMixin & ...
                    agora_connector.models.RelationMixin & ...
-                   agora_connector.models.WorkbookMixin
+                   agora_connector.models.WorkbookMixin & ...
+                   agora_connector.models.PatientMixin & ...
+                   agora_connector.models.FoldersMixin & ...
+                   agora_connector.models.ExamMixin & ...
+                   agora_connector.models.ExportAexMixin
     %UNTITLED9 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -11,7 +15,7 @@ classdef Dataset < agora_connector.models.BaseModel & ...
     
     properties (Constant)
         BASE_URL = '/api/v1/dataset/'
-        BASE_URL_V2 = '/api/v2/dataset/'                
+        BASE_URL_V2 = '/api/v2/dataset/'           
     end
     
     methods
@@ -38,5 +42,11 @@ classdef Dataset < agora_connector.models.BaseModel & ...
                 downloaded_files{end+1} = datafiles(i).download(path);
             end            
         end
-    end
+
+        function series = get_series(self)
+            import agora_connector.models.Series
+            instance = Series;            
+            series = instance.get(self.serie, self.http_client);
+        end
+    end   
 end
