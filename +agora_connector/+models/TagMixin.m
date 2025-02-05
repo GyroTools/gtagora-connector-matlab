@@ -28,6 +28,11 @@ classdef (Abstract, HandleCompatible) TagMixin
         function tags = get_tags(self)
             import agora_connector.models.Tag
             import agora_connector.models.TagInstance
+
+            if isprop(self,'tags')
+                tags = self.tags;
+                return
+            end
             
             url = TagInstance.BASE_URL;
             if isprop(self,'project')

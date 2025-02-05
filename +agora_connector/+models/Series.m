@@ -21,12 +21,16 @@ classdef Series < agora_connector.models.BaseModel & ...
     methods    
         function datasets = get_datasets(self, filters)
             import agora_connector.models.Dataset
+            import agora_connector.models.Tag
             dataset = Dataset;
             url = [self.BASE_URL, num2str(self.id), '/datasets/?limit=10000000000'];
             if nargin > 1
                 url = self.add_filter(url, filters);
             end
             datasets = dataset.get_list(self.http_client, url);
+
+            % prefetch the tags for all series
+            datasets = Tag.get_for_objects(datasets, self.project);
         end
     end
 end
