@@ -17,13 +17,16 @@ classdef Project < agora_connector.models.BaseModel
         end
 
         function exams = get_exams(self, filters)
-            import agora_connector.models.Exam            
+            import agora_connector.models.Exam 
+            import agora_connector.models.Tag
             url = [self.BASE_URL, num2str(self.id), '/exam/?limit=10000000000'];
             if nargin > 1
                 url = self.add_filter(url, filters);
             end
             exam = Exam;
             exams = exam.get_list(self.http_client, url);
+            % prefetch the tags for all exams
+            exams = Tag.get_for_objects(exams, self.id);   
         end
 
         function exams = get_exams_for_tag(self, tag)

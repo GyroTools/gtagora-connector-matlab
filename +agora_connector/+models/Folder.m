@@ -15,6 +15,7 @@ classdef Folder < agora_connector.models.BaseModel & ...
     methods  
         function items = get_items(self)
             import agora_connector.models.FolderItem
+            import agora_connector.models.Tag
 
             items = [];
             url = [self.BASE_URL, num2str(self.id), '/items/?limit=10000000000'];
@@ -23,6 +24,8 @@ classdef Folder < agora_connector.models.BaseModel & ...
                 folder_item = FolderItem(self.http_client);
                 items = [items, folder_item.fill_from_data(resp_items(i))];
             end
+            % prefetch the tags for all folder items
+            items = Tag.get_for_objects(items, self.project);   
         end
 
         function item = get_item(self, name, type)
