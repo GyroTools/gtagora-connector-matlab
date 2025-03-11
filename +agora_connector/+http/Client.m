@@ -215,32 +215,7 @@ classdef Client
                         progress_callback(file);
                     end
                 end
-                fclose(fid);
-                
-                hash_local = sha256(file.file);
-                hash_server = [];                
-                while isempty(hash_server)
-                    try
-                        data = self.get(['/api/v1/flowfile/' uid '/']);
-                    catch
-                        error('Failed to get the hash of the file from the server');
-                    end                                        
-                    if data.state == 2                       
-                        hash_server = data.content_hash;
-                        if ~strcmp(hash_local, hash_server)
-                            continue;
-                        else                           
-                             file.uploaded = true;
-                             file.size_uploaded = file.size;
-                             if ~isempty(progress_callback)
-                                 progress_callback(file);
-                             end
-                            break;
-                        end
-                    elseif data.state == 3 || data.state == 5
-                        error(['Failed to upload ' cur_file ': there was an error joining the chunks']);
-                    end                    
-                end                         
+                fclose(fid);                                           
             end                     
         end
     end
