@@ -182,7 +182,67 @@ classdef Agora
                 end
             end
             session = UploadSession(self.http_client, paths, target_folder_id, progress_file, json_import_file, verbose, wait);
-        end                       
+        end  
+
+        function logfiles = get_logfiles(self)
+            import agora_connector.models.Logfile
+            logfile = Logfile;
+            logfiles = logfile.get_list(self.http_client);
+        end
+
+        function traffic = plot_traffic(self, interval_sec)
+            import agora_connector.models.Logfile
+
+            if nargin == 1
+                interval_sec = 3600;           
+            end
+
+            logfiles = self.get_logfiles();
+            if isempty(logfiles)
+                return;
+            end
+            filenames = cell(1, length(logfiles));
+            for i = 1:length(logfiles)
+                filenames{i} = logfiles(i).filename;
+            end
+            [~, idx] = sort(filenames);
+            logfiles = logfiles(idx);
+            traffic = [];
+            traffic_old = [];
+            disp('parsing logfiles...');
+            for i = 1:length(logfiles)                                
+                [cur_traffic, cur_traffic_old] = logfiles(i).parse_traffic();
+                if ~isempty(cur_traffic) || ~isempty(cur_traffic_old)
+                    disp(['  ', logfiles(i).filename]);
+                end
+                if ~isempty(cur_traffic)                    
+                    if isempty(traffic)
+                        traffic = cur_traffic;
+                    else
+                        try
+                            traffic = cat(1, traffic, cur_traffic);
+                        catch
+                        end
+                    end
+                end
+                if ~isempty(cur_traffic_old)                    
+                    if isempty(traffic)
+                        traffic_old = cur_traffic_old;
+                    else
+                        try
+                            traffic_old = cat(1, traffic_old, cur_traffic_old);
+                        catch
+                        end
+                    end
+                end
+            end
+            disp('creating plots');
+            if ~isempty(traffic)
+                Logfile.plot_traffic(traffic, interval_sec);
+            elseif ~isempty(traffic_old)
+                Logfile.plot_traffic(traffic_old, interval_sec);
+            end
+        end
     end
     methods (Static)
         function agora = create(url, api_key, verify_certificate)
