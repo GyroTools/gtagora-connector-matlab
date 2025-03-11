@@ -42,7 +42,7 @@ classdef ImportPackage < agora_connector.models.BaseModel
                 json_import_file = [];
             end
             if nargin < 6
-                wait = true;
+                wait = false;
             end
             if nargin < 7
                 timeout = 1800;
@@ -232,7 +232,8 @@ classdef ImportPackage < agora_connector.models.BaseModel
                     end
                     pause(5);
                 end
-            end            
+            end   
+            fprintf('\n\n');
         end
 
         function complete(self, json_import_file, target_folder_id)
@@ -348,41 +349,24 @@ classdef ImportPackage < agora_connector.models.BaseModel
                 end
                 return;
             end
-            
-            for i = 1:length(data)
-                datafiles = cat(1, datafiles, data(i).datafiles);
-            end     
-            ids = [datafiles.id];
-            [~, i2] = unique(ids);
-            datafiles = datafiles(i2);
-                           
-            target_names = cell(1, length(state.files));
-            for i = 1:length(state.files)
-                [~, name, ext] = fileparts(state.files(i).target);                    
-                target_names{i} = [name, ext];
-            end
+            datafiles = data.datafiles;                                                 
+            target_names = {state.files.target};            
             
             if state.verbose
                 fprintf('\n\n');
                 disp("verifying imports...")
             end
             step = max(10, ceil(length(datafiles) / 100));
-            for i = 1:length(datafiles)
-                
+            for i = 1:length(datafiles)                
                 if state.verbose && mod(i, step) == 0
                     self.print_progress(i/length(datafiles));
                 end
-                datafile = datafiles(i);
-                [~, name, ext] = fileparts(datafile.name);
-                datafile_name = [name, ext];
-                indices = find(strcmp(target_names, datafile_name) & ~[state.files.imported]);                   
-                if ~isempty(indices)
-                    for index = indices
-                        local_sha1 = sha1(state.files(index).file);
-                        if strcmp(local_sha1, datafile.sha1)
-                            state.files(index).imported = true;
-                            break;
-                        end
+                datafile = datafiles(i);               
+                index = find(strcmp(target_names, datafile.path) & ~[state.files.imported], 1);                   
+                if ~isempty(index)
+                    local_sha1 = sha1(state.files(index).file);
+                    if strcmp(local_sha1, datafile.sha1)
+                        state.files(index).imported = true;                        
                     end
                 end
             end
@@ -411,7 +395,7 @@ classdef ImportPackage < agora_connector.models.BaseModel
         function print_final_message(self, state)
             if state.verbose
                 nr_datafiles_imported = sum([state.files.imported]);
-                success = all([state.files.uploaded] & [state.files.imported]);
+                success = all([state.files.imported]);
                 fprintf('\n\nImport complete:\n');
                 fprintf('  Files Uploaded: %d, Files Imported: %d\n', numel(state.files), nr_datafiles_imported);
                 if success
@@ -422,8 +406,7 @@ classdef ImportPackage < agora_connector.models.BaseModel
                     for f = not_imported
                         fprintf('  %s\n', f.file);
                     end
-                end
-                fprintf('\n');
+                end                
             end
         end
     end
