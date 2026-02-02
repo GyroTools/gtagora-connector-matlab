@@ -422,8 +422,10 @@ classdef ImportPackage < agora_connector.models.BaseModel
             for i = 1:length(paths)
                 path = paths{i};
                 if isfolder(path)
-                    root = path;                    
-                    filelist = dir(fullfile(path, '**', '*.*'));
+
+                    root = path;
+                    filelist = dir(fullfile(path, '**/*.*'));
+
                     for j = 1:length(filelist)
                         if ~filelist(j).isdir
                             absolute_file_path = fullfile(filelist(j).folder, filelist(j).name);
