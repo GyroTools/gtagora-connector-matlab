@@ -24,3 +24,4 @@ Makefile.in
 /docs/mrecon-doc/src/.idea
 /_release
 /mrecon
+.DS_Store

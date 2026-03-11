@@ -87,27 +87,37 @@ classdef Agora
             version = version.get([], self.http_client);
         end  
         
-        function tags = get_tags(self)
+        function tags = get_tags(self, name)
             import agora_connector.models.Tag
             tag = Tag;
             tags = tag.get_list(self.http_client);
-        end 
-        
-        function tag = get_tag(self, id_or_name)
-            import agora_connector.models.Tag
-            if ischar(id_or_name)
-                tags = self.get_tags();
-                for i = 1:length(tags)
-                    if strcmp(tags(i).label, id_or_name)
-                        tag = tags(i);
-                        return;
-                    end                    
-                end
-                error('tag not found');
-            else
-                tag = Tag;
-                tag = tag.get(id_or_name, self.http_client);
+            if nargin > 1 && ~isempty(name)
+                tags = tags(arrayfun(@(t) strcmp(t.label, name), tags));
             end
+        end
+        
+        function tag = get_tag(self, id)
+            import agora_connector.models.Tag            
+            tag = Tag;
+            tag = tag.get(id, self.http_client);            
+        end
+
+        function tag = create_tag(self, name, project, user, color, group )
+            import agora_connector.models.Tag
+            if nargin < 3
+                project = [];
+            end
+            if nargin < 4
+                user = [];               
+            end
+            if nargin < 5
+                color = [];
+            end
+            if nargin < 6
+                group = [];                
+            end
+            tag = Tag;
+            tag = tag.create(self.http_client, name, user, project, group, color);
         end
         
         function users = get_users(self)

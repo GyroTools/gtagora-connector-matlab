@@ -9,7 +9,67 @@ classdef Tag < agora_connector.models.BaseModel
         BASE_URL = '/api/v2/tag-definition/';
     end
     
-    methods                   
+    methods
+        function tag = create(self, http_client, name, user, project, group, color)
+            import agora_connector.models.Tag
+
+            if nargin > 1 && ~isempty(http_client)
+                self.http_client = http_client;
+            end
+            if nargin < 4
+                user = [];
+            end
+            if nargin < 5
+                project = [];
+            end
+            if nargin < 6
+                group = [];
+            end
+            if nargin < 7
+                color = [];
+            end
+
+            if isempty(user) && isempty(project)
+                error('Either user or project must be set');
+            end
+
+            data = struct();
+            data.label = name;
+
+            if ~isempty(user)
+                data.user = user;
+            end
+
+            if ~isempty(project)
+                if isnumeric(project)
+                    data.project = project;
+                elseif isa(project, 'agora_connector.models.Project')
+                    data.project = project.id;
+                else
+                    error('Project must be an integer or a Project object');
+                end
+                data.visibility = 2;
+                data.scope = 1;
+            else
+                data.visibility = 1;
+                data.scope = 2;
+            end
+
+            if ~isempty(group)
+                data.group = group;
+            end
+            if ~isempty(color)
+                data.color = color;
+            end
+
+            response = self.http_client.post(self.BASE_URL, data);
+            if ~isempty(response)
+                tag = Tag(self.http_client);
+                tag = tag.fill_from_data(response);
+            else
+                tag = [];
+            end
+        end
     end
 
     methods (Static)

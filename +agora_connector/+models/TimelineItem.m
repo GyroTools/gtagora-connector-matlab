@@ -6,7 +6,15 @@ classdef TimelineItem < agora_connector.models.BaseModel
     end
 
     properties (Constant)
-        BASE_URL = '/api/v2/timeline/'        
+        BASE_URL = '/api/v2/timeline/'
+
+        IDLE = 0
+        STARTED = 1
+        FINISHED = 2
+        ERROR = 3
+        CANCELING = 4
+        CANCELED = 5
+        QUEUED = 6
     end
 
     methods
@@ -19,25 +27,25 @@ classdef TimelineItem < agora_connector.models.BaseModel
         function self = poll(self, interval)
             if nargin < 2
                 interval = 2;
-            end            
+            end
             while true
                 self = self.get(self.id);
                 if isfield(self.data, 'state')
                     state = self.data.state;
-                    if state == 0 || state == 1
-                        pause(interval);                    
-                        continue                    
-                    elseif state == 2
+                    if state == self.IDLE || state == self.STARTED
+                        pause(interval);
+                        continue
+                    elseif state == self.FINISHED
                         return;
-                    elseif state == 3
+                    elseif state == self.ERROR
                         error(self.data.error.message);
-                    elseif state == 4 || state == 5
+                    elseif state == self.CANCELING || state == self.CANCELED
                         return;
                     end
                 else
                     return;
                 end
-            end                           
+            end
         end
     end
 end

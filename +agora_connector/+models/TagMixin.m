@@ -25,6 +25,48 @@ classdef (Abstract, HandleCompatible) TagMixin
             instance = instance.fill_from_data(response);
         end 
 
+        function remove_tag(self, tag)
+            import agora_connector.models.Tag
+            import agora_connector.models.TagInstance
+            import agora_connector.models.Project
+
+            if ~isa(tag, 'agora_connector.models.Tag')
+                error('The input must be a Tag class');
+            end
+
+            project = [];
+            if isprop(tag, 'project') && ~isempty(tag.project)
+                project = tag.project;
+            elseif isprop(self, 'project') && ~isempty(self.project)
+                project = self.project;
+            end
+
+            if isempty(project)
+                url = TagInstance.BASE_URL;
+            else
+                url = [Project.BASE_URL, num2str(project), '/tag-instance/'];
+            end
+
+            response = self.http_client.get(url);
+            instance = TagInstance(self.http_client);
+            instances = instance.fill_from_data_array(response);
+
+            tag_instance = [];
+            for i = 1:length(instances)
+                if instances(i).tag_definition == tag.id && instances(i).tagged_object_id == self.id
+                    tag_instance = instances(i);
+                    break;
+                end
+            end
+
+            if isempty(tag_instance)
+                error('The object is not tagged with the tag "%s"', tag.label);
+            end
+
+            url = [TagInstance.BASE_URL, num2str(tag_instance.id), '/'];
+            self.http_client.delete(url);
+        end
+
         function tags = get_tags(self)
             import agora_connector.models.Tag
             import agora_connector.models.TagInstance

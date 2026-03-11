@@ -17,11 +17,17 @@ classdef Task < agora_connector.models.BaseModel
         INPUT_TYPE_FLOAT = 7;
         INPUT_TYPE_SELECT = 8;
         INPUT_TYPE_FOLDER = 9;
+        INPUT_TYPE_STATIC = 10
+        INPUT_TYPE_BOOL = 11
     end
 
     methods
+        function syntax(self)
+            disp(self.get_run_cmd());
+        end
+
         % This function runs the task with the given input and target and returns the result
-        function timeline = run(self, target, varargin)  
+        function timeline = run(self, target, varargin)
             import agora_connector.models.TimelineItem
             
             if nargin < 2
@@ -52,6 +58,32 @@ classdef Task < agora_connector.models.BaseModel
     end
 
     methods (Hidden)
+        function cmd = get_run_cmd(self)
+            import agora_connector.models.Task
+
+            cmd = 'task.run(target_object, ';            
+            first = true;
+
+            for i = 1:length(self.inputs)
+                input = self.inputs(i);
+                if ~first
+                    cmd = [cmd, ', '];                   
+                end
+                type_name = Task.get_type_name(input.type);
+                cmd = [cmd, '''', input.key, ''', <', type_name, '>'];                
+                first = false;
+            end
+
+            if ~isempty(self.outputs)
+                if ~first
+                    cmd = [cmd, ', '];                    
+                end
+                cmd = [cmd, 'target=<target>'];                
+            end
+
+            cmd = [cmd, ')'];                        
+        end
+
         % This function gets the inputs from the arguments and returns a dictionary
         function body_inputs = get_inputs(self, arguments)
             import agora_connector.models.Task
@@ -141,6 +173,12 @@ classdef Task < agora_connector.models.BaseModel
                 name = 'float';
             elseif type == Task.INPUT_TYPE_SELECT
                 name = 'select';
+            elseif type == Task.INPUT_TYPE_STATIC
+                name = 'static';
+            elseif type == Task.INPUT_TYPE_BOOL
+                name = 'bool';
+            else
+                name = 'unknown';
             end
         end
     end
